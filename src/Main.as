@@ -18,6 +18,7 @@ package {
   import flash.text.TextFieldAutoSize;
   import flash.text.TextFormat;
   import flash.utils.setTimeout;
+  import flash.system.Security;
 
   import org.osmf.logging.Log;
   import org.osmf.logging.Logger;
@@ -83,6 +84,7 @@ package {
       removeEventListener(Event.ADDED_TO_STAGE, init);
       addEventListener(Event.RESIZE, onResize);
       stage.addEventListener(Event.RESIZE, onResize);
+      setupSecurity();
       setupLogger();
       setupDebugConsole();
       setupStage();
@@ -97,6 +99,10 @@ package {
       setupControlBar();
       drawLayout();
       setupErrorScreen();
+    }
+
+    private function setupSecurity():void {
+      Security.allowDomain("*");
     }
 
     private function onEnterFullScreen(e:PlayerEvent):void {
@@ -290,7 +296,7 @@ package {
       header.txtHeader.condenseWhite = true;
       header.txtHeader.htmlText = getFormatedTitle(e.lesson);
     }
-    
+
     private function getFormatedTitle(lesson:Object, limit:Number = 30):String{
       var program:String = lesson.grad_program.length > limit ? lesson.grad_program.substring(0, limit)+"..." : lesson.grad_program;
       var course:String = lesson.course.length > limit ? lesson.course.substring(0, limit)+"..." : lesson.course;
