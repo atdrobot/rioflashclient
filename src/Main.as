@@ -87,7 +87,6 @@ package {
       setupSecurity();
       setupLogger();
       setupDebugConsole();
-      setupStage();
       logger.info('Starting Application...');
       setupConfiguration();
       setupFullScreenManager();
@@ -99,6 +98,7 @@ package {
       setupControlBar();
       drawLayout();
       setupErrorScreen();
+      setupStage();
     }
 
     private function setupSecurity():void {
