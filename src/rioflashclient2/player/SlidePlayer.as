@@ -9,6 +9,11 @@ package rioflashclient2.player {
   import flash.display.Loader;
   import flash.geom.Rectangle;
   import flash.utils.setTimeout;
+  import flash.system.LoaderContext;
+  import flash.system.Security;
+  import flash.system.ApplicationDomain;
+  import flash.system.SecurityDomain;
+
   import org.osmf.events.TimeEvent;
   import org.osmf.logging.Log;
   import org.osmf.logging.Logger;
@@ -67,7 +72,12 @@ package rioflashclient2.player {
       for ( var i:uint = 0; i< slides.length; i++) {
         var slide:Slide = slides[i];
         var slideURL:String = Configuration.getInstance().resourceURL(slide.relative_path);
-        loader.add(slideURL, { id: ("slide_" + i), priority: (slides.length - i), type: "movieclip" });
+
+        var myLoaderContext:LoaderContext = new LoaderContext();
+        if (Security.sandboxType!='localTrusted') myLoaderContext.securityDomain = SecurityDomain.currentDomain;
+        myLoaderContext.applicationDomain = ApplicationDomain.currentDomain;
+
+        loader.add(slideURL, { id: ("slide_" + i), priority: (slides.length - i), type: "movieclip", context: myLoaderContext });
         loader.get("slide_" + i).addEventListener(Event.COMPLETE, onSingleItemLoaded);
       }
       loader.get("slide_0").addEventListener(Event.COMPLETE, onFirstItemLoaded);
