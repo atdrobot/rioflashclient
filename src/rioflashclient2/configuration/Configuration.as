@@ -201,6 +201,7 @@ package rioflashclient2.configuration {
       //'http://roxo.no-ip.com:3001/redirect.rio?file=/ufrj/palestras/hucff/palestra_nelson.xml';
       //xmlfile = "http://roxo.no-ip.com:3001/redirect.rio?file=/ufrj/palestras/hucff/palestra_nelson.xml";
       //xmlfile = "http://roxo.no-ip.com:3001/redirect.rio?file=/aula_ruby.xml";
+	  xmlfile ="http://edad.com:8080/redirect.rio?file=palestra_nelson.xml"
       baseRioServerURL = xmlfile.slice(0, xmlfile.lastIndexOf('/') + 1);
       lessonXML = xmlfile.slice(xmlfile.lastIndexOf('/') + 1, xmlfile.length);
     }

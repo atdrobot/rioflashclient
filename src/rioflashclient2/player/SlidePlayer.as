@@ -71,6 +71,7 @@ package rioflashclient2.player {
 
     private function init(e:Event=null):void {
       setupBusListeners();
+	  
       container = new MovieClip();
       addChild(container);
     }
@@ -93,7 +94,7 @@ package rioflashclient2.player {
         var myLoaderContext:LoaderContext = new LoaderContext();
         if (Security.sandboxType!='localTrusted') myLoaderContext.securityDomain = SecurityDomain.currentDomain;
         myLoaderContext.applicationDomain = ApplicationDomain.currentDomain;
-
+		
         loader.add(slideURL, { id: ("slide_" + i), priority: (slides.length - i), type: "movieclip", context: myLoaderContext });
         loader.get("slide_" + i).addEventListener(Event.COMPLETE, onSingleItemLoaded);
       }
@@ -211,12 +212,14 @@ package rioflashclient2.player {
 
     private function onSlideCuePoint(event:TimelineMetadataEvent):void {
       if (sync) {
-        trace("slide cuepoint")
         var cuePoint:CuePoint = event.marker as CuePoint;
         if (cuePoint.name.indexOf("Slide") != -1) {
-          var slideNumber:Number = Number(cuePoint.name.substring(cuePoint.name.indexOf("_") + 1, cuePoint.name.length)) -1;
+          var slideNumber:Number = Number(cuePoint.name.substring(cuePoint.name.indexOf("_") + 1)) -1;
           showSlide(slideNumber, true);
-        }
+        }else if(cuePoint.name.indexOf("Action") != -1){
+			var callback:String = cuePoint.name.substring(cuePoint.name.indexOf("_") + 1);
+			currentSlide()[callback]();
+		}
       }
     }
 

@@ -22,23 +22,25 @@ package {
   import com.yahoo.astra.layout.events.LayoutEvent;
   import com.yahoo.astra.layout.modes.BorderConstraints;
   import com.yahoo.astra.layout.modes.VerticalAlignment;
-
+  
   import fl.containers.BaseScrollPane;
   import fl.controls.ScrollPolicy;
-
+  
   import flash.display.LoaderInfo;
   import flash.display.MovieClip;
   import flash.display.Sprite;
   import flash.display.StageAlign;
   import flash.display.StageScaleMode;
   import flash.events.Event;
+  import flash.system.Security;
+  import flash.system.System;
   import flash.text.TextFieldAutoSize;
   import flash.text.TextFormat;
   import flash.utils.setTimeout;
-
+  
   import org.osmf.logging.Log;
   import org.osmf.logging.Logger;
-
+  
   import rioflashclient2.assets.Header;
   import rioflashclient2.chrome.controlbar.ControlBar;
   import rioflashclient2.chrome.controlbar.NavigationBar;
@@ -114,6 +116,9 @@ package {
       drawLayout();
       setupErrorScreen();
       setupStage();
+	  Security.allowDomain("*");
+	  
+	  
     }
 
     private function onEnterFullScreen(e:PlayerEvent):void {

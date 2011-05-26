@@ -19,7 +19,7 @@ package rioflashclient2.model {
   public class Slide {
     public var time:int;
     public var relative_path:String;
-    
+    public var actions:Array;
     public function Slide() {
     }
     
@@ -27,6 +27,12 @@ package rioflashclient2.model {
       var slide:Slide = new Slide();
       slide.time = rawSlide.@time;
       slide.relative_path = rawSlide.@relative_path;
+	  slide.actions = [];
+	  if(rawSlide.actions.action.length()){
+		  for each(var item:XML in rawSlide.actions.action){
+			  slide.actions.push({time: item.@time, callback:item.text()});
+		  }
+	  }
       return slide;
     }
 

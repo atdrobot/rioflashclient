@@ -17,10 +17,10 @@
 
 package rioflashclient2.player {
   import caurina.transitions.Tweener;
-
+  
   import flash.events.ErrorEvent;
   import flash.events.Event;
-
+  
   import org.osmf.elements.ProxyElement;
   import org.osmf.elements.VideoElement;
   import org.osmf.events.*;
@@ -44,7 +44,7 @@ package rioflashclient2.player {
   import org.osmf.traits.MediaTraitType;
   import org.osmf.traits.SeekTrait;
   import org.osmf.traits.TimeTrait;
-
+  
   import rioflashclient2.configuration.Configuration;
   import rioflashclient2.elements.PseudoStreamingProxyElement;
   import rioflashclient2.event.EventBus;
@@ -77,7 +77,8 @@ package rioflashclient2.player {
 
     private var topicsTimelineMetadata:TimelineMetadata;
     private var slidesTimelineMetadata:TimelineMetadata;
-
+	private var slidesActionTimelineMetadata:TimelineMetadata;
+	
     private var netLoader:NetLoader;
 
     public function Player() {
@@ -127,6 +128,10 @@ package rioflashclient2.player {
       slidesTimelineMetadata = new TimelineMetadata(pseudoStreamingProxyElement);
       slidesTimelineMetadata.addEventListener(TimelineMetadataEvent.MARKER_TIME_REACHED, EventBus.dispatch, false, 0, true);
       addSlidesMetadata(this.slides);
+	  
+	  slidesActionsTimelineMetadata = new TimelineMetadata(pseudoStreamingProxyElement);
+	  slidesActionsTimelineMetadata.addEventListener(TimelineMetadataEvent.MARKER_TIME_REACHED, EventBus.dispatch, false, 0, true);
+	  addSlidesActionMetadata(this.slides);
     }
 
     public function addTopicsMetadata(topics:Topics):void {
@@ -142,7 +147,19 @@ package rioflashclient2.player {
         slidesTimelineMetadata.addMarker(cuePoint);
       }
     }
-
+	
+	public function addSlidesActionMetadata(slides:Array):void {
+		trace("addSlidesActionMetadata", slides[0].relative_path, slides[0].actions);
+		for each(var slide:Slide in slides){
+			trace("slide", slide.actions);
+			for each(var action:Object in slide.actions){
+				var cuePoint:CuePoint = new CuePoint(CuePointType.ACTIONSCRIPT, action.time, "Action_" + action.callback, null);
+				trace("ACTION", action.time, action.callback);
+				slidesActionsTimelineMetadata.addMarker(cuePoint);
+			}
+		}
+	}
+	
     private function onCuePoint(event:TimelineMetadataEvent):void
     {
       var cuePoint:CuePoint = event.marker as CuePoint;
