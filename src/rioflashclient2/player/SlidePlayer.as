@@ -218,7 +218,7 @@ package rioflashclient2.player {
           showSlide(slideNumber, true);
         }else if(cuePoint.name.indexOf("Action") != -1){
 			var callback:String = cuePoint.name.substring(cuePoint.name.indexOf("_") + 1);
-			currentSlide()[callback]();
+			currentSlide().content[callback]();
 		}
       }
     }
