@@ -22,10 +22,10 @@ package {
   import com.yahoo.astra.layout.events.LayoutEvent;
   import com.yahoo.astra.layout.modes.BorderConstraints;
   import com.yahoo.astra.layout.modes.VerticalAlignment;
-  
+
   import fl.containers.BaseScrollPane;
   import fl.controls.ScrollPolicy;
-  
+
   import flash.display.LoaderInfo;
   import flash.display.MovieClip;
   import flash.display.Sprite;
@@ -37,10 +37,10 @@ package {
   import flash.text.TextFieldAutoSize;
   import flash.text.TextFormat;
   import flash.utils.setTimeout;
-  
+
   import org.osmf.logging.Log;
   import org.osmf.logging.Logger;
-  
+
   import rioflashclient2.assets.Header;
   import rioflashclient2.chrome.controlbar.ControlBar;
   import rioflashclient2.chrome.controlbar.NavigationBar;
@@ -116,9 +116,7 @@ package {
       drawLayout();
       setupErrorScreen();
       setupStage();
-	  Security.allowDomain("*");
-	  
-	  
+      //Security.allowDomain("*");
     }
 
     private function onEnterFullScreen(e:PlayerEvent):void {
@@ -312,7 +310,7 @@ package {
       header.txtHeader.condenseWhite = true;
       header.txtHeader.htmlText = getFormatedTitle(e.lesson);
     }
-    
+
     private function getFormatedTitle(lesson:Object, limit:Number = 30):String{
       var program:String = lesson.grad_program.length > limit ? lesson.grad_program.substring(0, limit)+"..." : lesson.grad_program;
       var course:String = lesson.course.length > limit ? lesson.course.substring(0, limit)+"..." : lesson.course;
