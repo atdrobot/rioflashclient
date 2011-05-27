@@ -217,10 +217,10 @@ package rioflashclient2.player {
         if (cuePoint.name.indexOf("Slide") != -1) {
           var slideNumber:Number = Number(cuePoint.name.substring(cuePoint.name.indexOf("_") + 1)) -1;
           showSlide(slideNumber, true);
-        }else if(cuePoint.name.indexOf("Action") != -1){
-      var callback:String = cuePoint.name.substring(cuePoint.name.indexOf("_") + 1);
-      currentSlide().content[callback]();
-    }
+        } else if (cuePoint.name.indexOf("Action") != -1) {
+          var callback:String = cuePoint.name.substring(cuePoint.name.indexOf("_") + 1);
+          currentSlide().content[callback]();
+        }
       }
     }
 
