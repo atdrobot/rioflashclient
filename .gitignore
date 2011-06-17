@@ -11,6 +11,8 @@ bin-debug/*
 bin-debug/**/*
 lib/asunit3
 lib/asunit3/**/*
+lib/asunit4
+lib/asunit4/**/*
 test_report.txt
 tests_failed.txt
 test_server.log

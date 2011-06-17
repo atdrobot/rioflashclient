@@ -1,50 +1,102 @@
-require 'sprout'
-# Optionally load gems from a server other than rubyforge:
-# set_sources 'http://gems.projectsprouts.org'
-sprout 'as3'
+require 'rubygems'
+require 'bundler'
+require 'bundler/setup'
 
-############################################
-# Configure your Project Model
-project_model :model do |m|
-  m.project_name            = 'rioflashclient2'
-  m.language                = 'as3'
-  m.compiler_gem_name       = 'sprout-flex4sdk-tool'
-  m.background_color        = '#FFFFFF'
-  m.width                   = 1000
-  m.height                  = 768
-  # m.use_fdb               = true
-  # m.use_fcsh              = true
-  # m.preprocessor          = 'cpp -D__DEBUG=false -P - - | tail -c +3'
-  # m.preprocessed_path     = '.preprocessed'
-  # m.src_dir               = 'src'
-  # m.lib_dir               = 'lib'
-  # m.swc_dir               = 'lib'
-  # m.bin_dir               = 'bin'
-  # m.test_dir              = 'test'
-  # m.doc_dir               = 'doc'
-  # m.asset_dir             = 'assets'
-  # m.compiler_gem_version  = '>= 4.0.0'
-  # m.source_path           << "#{m.lib_dir}/somelib"
-  # m.libraries             << :corelib
+require 'rake/clean'
+require 'flashsdk'
 
-  m.source_path             << "#{m.lib_dir}/bulkloader-rev-282"
-  m.library_path            << 'assets/player_assets.swc'
-  m.library_path            << 'lib/OSMF.swc'
-  m.library_path            << 'lib/tweener_v1.33.74.swc'
-  m.library_path            << 'lib/corelib.swc'
+def configure_task t
+  t.source_path             << "lib/bulkloader-rev-282"
+  t.library_path            << 'assets/player_assets.swc'
+  t.library_path            << 'lib/OSMF.swc'
+  t.library_path            << 'lib/tweener_v1.33.74.swc'
+  t.library_path            << 'lib/corelib.swc'
 end
 
-Dir['tasks/**/*.rake'].each { |file| load file }
+##
+# Set USE_FCSH to true in order to use FCSH for all compile tasks.
+#
+# You can also set this value by calling the :fcsh task 
+# manually like:
+#
+#   rake fcsh run
+#
+# These values can also be sent from the command line like:
+#
+#   rake run FCSH_PKG_NAME=flex3
+#
+# ENV['USE_FCSH']         = true
+# ENV['FCSH_PKG_NAME']    = 'flex4'
+# ENV['FCSH_PKG_VERSION'] = '1.0.14.pre'
+# ENV['FCSH_PORT']        = 12321
 
-desc 'Compile and debug the application'
-debug :compile_and_debug do |t|
-  t.debug                                 = true
-  t.input                                 = 'src/Main.as'
+##############################
+# Debug
+
+# Compile the debug swf
+mxmlc "bin/rioflashclient-debug.swf" do |t|
+  t.input = "src/Main.as"
+  t.debug = true
+  t.strict                                = false
+  t.define_conditional                    << "CONFIG::LOGGING,false"
+  t.define_conditional                    << "CONFIG::FLASH_10_1,false"
+  t.static_link_runtime_shared_libraries  = true
+  configure_task t
+end
+
+desc "Compile and run the debug swf"
+flashplayer :run => "bin/rioflashclient-debug.swf"
+
+##############################
+# Test
+
+library :asunit4
+
+# Compile the test swf
+mxmlc "bin/rioflashclient-test.swf" => :asunit4 do |t|
+  t.input = "test/runner/TestRunner.as"
+  t.source_path << 'test'
+  t.debug = true
+  t.strict                                = false
+  t.define_conditional                    << "CONFIG::LOGGING,false"
+  t.define_conditional                    << "CONFIG::FLASH_10_1,false"
+  t.static_link_runtime_shared_libraries  = true
+  configure_task t
+end
+
+desc "Compile and run the test swf"
+flashplayer :test => "bin/rioflashclient-test.swf"
+
+##############################
+# SWC
+
+compc "bin/rioflashclient.swc" do |t|
+  t.input_class = "Main"
+  t.source_path << 'src'
+  configure_task t
   t.strict                                = false
   t.define_conditional                    << "CONFIG::LOGGING,false"
   t.define_conditional                    << "CONFIG::FLASH_10_1,false"
   t.static_link_runtime_shared_libraries  = true
 end
+
+desc "Compile the SWC file"
+task :swc => 'bin/rioflashclient.swc'
+
+##############################
+# DOC
+
+desc "Generate documentation at doc/"
+asdoc 'doc' do |t|
+  t.doc_sources << "src"
+  t.exclude_sources << "test/runner/TestRunner.as"
+end
+
+##############################
+# DEFAULT
+task :default => :run
+
+#Dir['tasks/**/*.rake'].each { |file| load file }
 
 namespace :test do
   desc 'Starts the test server'
@@ -64,7 +116,9 @@ namespace :test do
   end
 
   desc 'Compile run the test harness'
-  unit :runner => [:start_server, :create_fixtures_symlink] do |t|
+  mxmlc :runner => [:start_server, :create_fixtures_symlink] do |t|
+    t.source_path << 'test'
+    t.source_path << 'src'
     t.debug                                 = true
     t.input                                 = 'test/runner/TestRunner.as'
     t.library_path                          << 'test/lib/flexunit-aircilistener-4.1.0.swc'
@@ -73,11 +127,12 @@ namespace :test do
     t.library_path                          << 'test/lib/flexunit-uilistener-4.1.0.swc'
     t.default_size                          = '1024 768'
     t.static_link_runtime_shared_libraries  = true
+    configure_task t
   end
 end
 
 desc 'Runs both test server and test runner'
-task :test => 'test:runner' do
+task :test => 'runner' do
   root_dir = File.expand_path(File.dirname(__FILE__))
   if File.exist?(File.join(root_dir, 'tests_failed.txt'))
     exit 1
@@ -87,7 +142,7 @@ task :test => 'test:runner' do
 end
 
 desc 'Compile the optimized deployment'
-deploy :compile do |t|
+mxmlc :compile do |t|
  t.input                                 = 'src/Main.as'
  t.strict                                = true
  t.define_conditional                    << "CONFIG::LOGGING,false"
@@ -95,14 +150,8 @@ deploy :compile do |t|
  t.static_link_runtime_shared_libraries  = true
 end
 
-desc 'Create documentation'
-document :doc
-
-desc 'Compile a SWC file'
-swc :swc
-
 desc 'Compile and run the test harness for CI'
-ci :ci => ['test:start_server', 'test:create_fixtures_symlink'] do |t|
+mxmlc :ci => ['test:start_server', 'test:create_fixtures_symlink'] do |t|
   t.input                                 = 'test/runner/TestRunner.as'
   t.library_path                          << 'test/lib/flexunit-aircilistener-4.1.0.swc'
   t.library_path                          << 'test/lib/flexunit-cilistener-4.1.0.swc'
@@ -120,6 +169,3 @@ task :cruise => :ci do
     exit 0
   end
 end
-
-# set up the default rake task
-task :default => :debug
