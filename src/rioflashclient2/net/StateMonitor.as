@@ -195,55 +195,48 @@ package rioflashclient2.net
 		
 		private function setTargetsByTime(targetTime:Number):void
 		{
-			if (this.slideSync)
+			this.targetSlide = 0;
+			for (var i:uint = 0; i < this.slides.length; i++)
 			{
-				this.targetSlide = 0;
-				for (var i:uint = 0; i < this.slides.length; i++)
+				if (targetTime < this.slides[i].time)
 				{
-					if (targetTime < this.slides[i].time)
-					{
-						break;
-					}
+					break;
 				}
-				this.targetSlide = i;
-
-				this.targetTopic = 0;
-				for (var j:uint = 0; j < this.topics.length; j++)
-				{
-					if (targetTime < this.topics[j])
-					{
-						break;
-					}
-				}
-				this.targetTopic = j;
 			}
-			else
+			this.targetSlide = i;
+
+			this.targetTopic = 0;
+			for (var j:uint = 0; j < this.topics.length; j++)
+			{
+				if (targetTime < this.topics[j])
+				{
+					break;
+				}
+			}
+			this.targetTopic = j;
+
+			if (this.slideSync == false)
 			{
 				this.targetSlide = -1;
-				this.targetTime = -1;
-				this.targetTopic = -1;
 			}
 		}
 		
 		private function setTargetsBySlide(slideNumber:Number):void
 		{
-			if (this.slideSync)
+			this.targetTime = this.slides[slideNumber].time;
+			this.targetTopic = 0;
+			for (var j:uint = 0; j < this.topics.length; j++)
 			{
-				this.targetTime = this.slides[slideNumber].time;
-				this.targetTopic = 0;
-				for (var j:uint = 0; j < this.topics.length; j++)
+				if (this.targetTime < this.topics[j])
 				{
-					if (this.targetTime < this.topics[j])
-					{
-						break;
-					}
+					break;
 				}
-				this.targetTopic = j;
-				this.targetSlide = slideNumber + 1;
 			}
-			else
+			this.targetTopic = j;
+			this.targetSlide = slideNumber + 1;
+
+			if (this.slideSync == false)
 			{
-				this.targetSlide = -1;
 				this.targetTime = -1;
 				this.targetTopic = -1;
 			}
