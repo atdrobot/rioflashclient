@@ -31,6 +31,8 @@ package rioflashclient2.model {
 
   import org.osmf.logging.Log;
   import org.osmf.logging.Logger;
+  
+  import rioflashclient2.net.StateMonitor;
 
   public class LessonLoader extends GenericLoader {
 
@@ -51,7 +53,9 @@ package rioflashclient2.model {
     }
 
     protected override function url():String {
+		var path:String = Configuration.getInstance().getXMLPath();
+		StateMonitor.Instance.SetXmlPath(path);
       return Configuration.getInstance().resourceURL(Configuration.getInstance().lessonXML);
     }
   }
-}
+} 
