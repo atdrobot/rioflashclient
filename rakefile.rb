@@ -141,14 +141,17 @@ task :test => 'runner' do
   end
 end
 
-desc 'Compile the optimized deployment'
-mxmlc :compile do |t|
+mxmlc "bin/rioflashclient.swf" do |t|
  t.input                                 = 'src/Main.as'
  t.strict                                = true
  t.define_conditional                    << "CONFIG::LOGGING,false"
  t.define_conditional                    << "CONFIG::FLASH_10_1,false"
  t.static_link_runtime_shared_libraries  = true
+ configure_task t
 end
+
+desc 'Compile the optimized deployment'
+flashplayer :compile => "bin/rioflashclient.swf"
 
 desc 'Compile and run the test harness for CI'
 mxmlc :ci => ['test:start_server', 'test:create_fixtures_symlink'] do |t|
