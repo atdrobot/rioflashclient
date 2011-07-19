@@ -93,9 +93,8 @@ package rioflashclient2.player {
 
         var myLoaderContext:LoaderContext = new LoaderContext();
         if (Security.sandboxType!='localTrusted') myLoaderContext.securityDomain = SecurityDomain.currentDomain;
-        myLoaderContext.applicationDomain = ApplicationDomain.currentDomain;
-        //myLoaderContext.allowCodeImport = true;
-
+        var current:ApplicationDomain = ApplicationDomain.currentDomain;
+        myLoaderContext.applicationDomain = new ApplicationDomain();
         loader.add(slideURL, { id: ("slide_" + i), priority: (slides.length - i), type: "movieclip", context: myLoaderContext });
         loader.get("slide_" + i).addEventListener(Event.COMPLETE, onSingleItemLoaded);
       }
