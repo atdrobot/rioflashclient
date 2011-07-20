@@ -55,12 +55,7 @@ package rioflashclient2.player {
   import rioflashclient2.model.Slide;
   import rioflashclient2.model.Topics;
   import rioflashclient2.model.Video;
-  import rioflashclient2.net.Messages.ActionMessage;
-  import rioflashclient2.net.Messages.Message;
-  import rioflashclient2.net.Messages.StartSessionMessage;
-  import rioflashclient2.net.RemoteLogger;
   import rioflashclient2.net.RioServerNetLoader;
-  import rioflashclient2.net.StateMonitor;
   import rioflashclient2.net.pseudostreaming.DefaultSeekDataStore;
 
   public class Player extends MediaPlayerSprite {
@@ -116,7 +111,6 @@ package rioflashclient2.player {
     public function loadMedia():void {
       var url:String = Configuration.getInstance().resourceURL(this.video.file());
       logger.info('Loading video from url: ' + url);
-      RemoteLogger.Instance.SetServer(url.substring(0, url.indexOf("/", 8)));
 
       netLoader = new RioServerNetLoader();
       var videoElement:VideoElement = new VideoElement(null, netLoader);
@@ -135,7 +129,6 @@ package rioflashclient2.player {
       slidesTimelineMetadata.addEventListener(TimelineMetadataEvent.MARKER_TIME_REACHED, EventBus.dispatch, false, 0, true);
       addSlidesMetadata(this.slides);
 
-	  Message.setSessionId();
       slidesActionsTimelineMetadata = new TimelineMetadata(pseudoStreamingProxyElement);
       slidesActionsTimelineMetadata.addEventListener(TimelineMetadataEvent.MARKER_TIME_REACHED, EventBus.dispatch, false, 0, true);
       addSlidesActionsMetadata(this.slides);
@@ -177,19 +170,16 @@ package rioflashclient2.player {
         this.mediaPlayer.seek(playaheadTime);
       }
       this.mediaPlayer.play();
-	  StateMonitor.Instance.SetState("PLAY");
     }
 
     public function pause():void {
       logger.info('Paused...');
       this.mediaPlayer.pause();
-	  StateMonitor.Instance.SetState("PAUSE");
     }
 
     public function stop():void {
       logger.info('Stopping...');
       this.mediaPlayer.stop();
-	  StateMonitor.Instance.SetState("STOP");
       fadeOut();
     }
 
@@ -238,12 +228,10 @@ package rioflashclient2.player {
       }
       var seekPosition:Number = calculatedSeekPositionGivenPercentage(seekPercentage);
       seekTo(seekPercentage, seekPosition);
-	  StateMonitor.Instance.Jump("PROGRESSBAR_CHANGED", seekPosition);
     }
 
     private function onTopicsSeek(e:PlayerEvent):void {
-      //var seekPosition:Number = e.data;
-	  var seekPosition:Number = e.data.item.time;
+      var seekPosition:Number = e.data;
       var seekPercentage:Number = seekPosition / duration;
 
       seekTo(seekPercentage, seekPosition);
@@ -301,13 +289,11 @@ package rioflashclient2.player {
 
     private function updateDownloadProgress(bytesLoaded:Number):void {
       if (bytesTotal > 0) {
-        StateMonitor.Instance.SetDownloadedBytes(bytesLoaded);
         downloadProgressPercentage = bytesLoaded / bytesTotal;
       } else {
         downloadProgressPercentage = 0;
       }
- 	  StateMonitor.Instance.StartSession();
-   }
+    }
 
     private function onStateChange(event:MediaPlayerStateChangeEvent):void {
       logger.info('Media Player State Change: {0}', event.state);

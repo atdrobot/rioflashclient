@@ -44,7 +44,6 @@ package rioflashclient2.player {
   import rioflashclient2.model.Lesson;
   import rioflashclient2.model.Slide;
   import rioflashclient2.model.Video;
-  import rioflashclient2.net.StateMonitor;
 
   public class SlidePlayer extends MovieClip {
     private var logger:Logger = Log.getLogger('SlidePlayer');
@@ -131,7 +130,6 @@ package rioflashclient2.player {
 
     public function onAllItemsLoaded(e:BulkProgressEvent) : void {
       trace("all slides loaded");
-	  StateMonitor.Instance.SetSlides(this.slides);
     }
 
     public function onAllProgress(e:BulkProgressEvent) : void {
@@ -140,22 +138,19 @@ package rioflashclient2.player {
 
     private function onFirstSlide(e:SlideEvent):void {
       if (dataLoaded) {
-	    StateMonitor.Instance.SlideChanged(0, "FIRST");
         showSlide(0)
       }
     }
 
     private function onLastSlide(e:SlideEvent):void {
       if (dataLoaded) {
-       StateMonitor.Instance.SlideChanged(slides.length - 1, "LAST");
-       showSlide(slides.length - 1);
+        showSlide(slides.length - 1);
       }
     }
 
     private function onPreviousSlide(e:SlideEvent):void {
       if (dataLoaded) {
         if (currentSlideIndex > 0) {
-		  StateMonitor.Instance.SlideChanged(currentSlideIndex - 1, "PREV");
           showSlide(currentSlideIndex - 1);
         }
       }
@@ -164,7 +159,6 @@ package rioflashclient2.player {
     private function onNextSlide(e:SlideEvent):void {
       if (dataLoaded) {
         if (currentSlideIndex < (slides.length - 1)) {
-		  StateMonitor.Instance.SlideChanged(currentSlideIndex + 1, "NEXT");
           showSlide(currentSlideIndex + 1);
         }
       }
@@ -187,7 +181,6 @@ package rioflashclient2.player {
 
     private function onCurrentTimeChange(e:TimeEvent):void {
       videoPlayerCurrentTime = e.time;
-	  StateMonitor.Instance.SetTime(e.time);
     }
 
     private function onSlideSyncChanged(e:SlideEvent):void {
@@ -196,7 +189,6 @@ package rioflashclient2.player {
         var time:Number = slides[findNearestSlide(videoPlayerCurrentTime)].time
         showSlideByPosition(time);
       }
-	  StateMonitor.Instance.SetSlideSync(this.sync);
     }
 
     private function onSeek(e:PlayerEvent):void {
@@ -213,7 +205,7 @@ package rioflashclient2.player {
 
     private function onTopicsSeek(e:PlayerEvent):void {
       if (sync) {
-        var seekPosition:Number = e.data.item.time;
+        var seekPosition:Number = e.data;
         logger.info('Slide Seeking to position {0} in seconds.', seekPosition);
         showSlideByPosition(seekPosition);
       }
@@ -264,7 +256,6 @@ package rioflashclient2.player {
           loader.get("slide_" + index).addEventListener(Event.COMPLETE, onRequestedSlideLoaded);
         }
       }
-	  StateMonitor.Instance.SetSlideInfo(index);
       trace("END show slide")
     }
 

@@ -197,7 +197,7 @@ package rioflashclient2.configuration {
     private function setupBaseRioServerURL():void {
       //http://edad.rnp.br/rioflashclient_test.php?xmlfile=/cederj/treinamento/parte2/cederj_treinamento_parte2.xml
       //http://edad.rnp.br/rioflashclient_test.php?xmlfile=/cederj_fisica/a_resistencia_do_ar/a_resistencia_do_ar.xml
-      var xmlfile:String = rawParameters.xmlfile || 'http://trindade.land.ufrj.br/redirect.rio?file=/ufrj/palestras/hucff/palestra_nelson.xml';
+      var xmlfile:String = rawParameters.xmlfile || 'http://edad.rnp.br/redirect.rio?file=/cederj/treinamento/parte2/cederj_treinamento_parte2.xml';
       //'http://roxo.no-ip.com:3001/redirect.rio?file=/ufrj/palestras/hucff/palestra_nelson.xml';
       //xmlfile = "http://roxo.no-ip.com:3001/redirect.rio?file=/ufrj/palestras/hucff/palestra_nelson.xml";
       //xmlfile = "http://roxo.no-ip.com:3001/redirect.rio?file=/aula_ruby.xml";
@@ -240,14 +240,5 @@ package rioflashclient2.configuration {
       }
       return url;
     }
-	
-	public function getXMLPath():String
-	{
-		var startCut:Number = this.baseRioServerURL.indexOf("=");
-		var path:String = this.baseRioServerURL.substring(startCut + 1);
-		startCut = this.lessonXML.indexOf("=");
-		var fileName:String = this.lessonXML.substring(startCut + 1);
-		return path + fileName;
-	}
   }
 }

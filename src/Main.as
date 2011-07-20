@@ -59,7 +59,6 @@ package {
   import rioflashclient2.logging.EventfulLogger;
   import rioflashclient2.logging.EventfulLoggerFactory;
   import rioflashclient2.model.LessonLoader;
-  import rioflashclient2.net.StateMonitor;
   import rioflashclient2.player.Player;
   import rioflashclient2.player.SlidePlayer;
   import rioflashclient2.user.VolumeSettings;
@@ -123,15 +122,11 @@ package {
     private function onEnterFullScreen(e:PlayerEvent):void {
       fullScreenMode = e.data.mode;
       resizeElements(fullScreenMode);
-
-      var mode:String = fullScreenMode == "video" ? "FULLSCREENVIDEO" : "FULLSCREENAPP";
-      StateMonitor.Instance.SetPlayerMode(mode);
     }
 
     private function onExitFullScreen(e:PlayerEvent):void {
       fullScreenMode = "application";
       resizeElements(fullScreenMode);
-      StateMonitor.Instance.SetPlayerMode("REGULAR");
     }
 
     private function hideElements():void {
@@ -181,7 +176,6 @@ package {
 
     private function resizeDragUpdateHandler(event:DragEvent = null):void {
       resizeElements(fullScreenMode);
-      StateMonitor.Instance.Resize();
     }
 
     private function resizeElements(mode:String):void {
@@ -213,7 +207,6 @@ package {
       player.x = 0;
       player.y = 0;
       player.setSize(stage.stageWidth, stage.stageHeight - controlbar.height);
-      StateMonitor.Instance.SetPlayerMode("FULLSCREENAPP");
     }
 
     private function resizeControlBar():void {
