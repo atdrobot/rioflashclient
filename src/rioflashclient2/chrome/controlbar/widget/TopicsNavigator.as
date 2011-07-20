@@ -90,7 +90,7 @@ package rioflashclient2.chrome.controlbar.widget {
 	  if( this.selectedIndex != -1 )
 	  {
 	      var topicTime:Number = this.topics.topicTimes[this.selectedIndex];
-	      StateMonitor.Instance.SetTopicInfo(this.selectedIndex, topicTime);
+	      StateMonitor.Instance.SetTopicInfo(this.selectedIndex + 1, topicTime);
 	  }
     }
 

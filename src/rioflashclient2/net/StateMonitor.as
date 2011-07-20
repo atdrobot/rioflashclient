@@ -69,7 +69,7 @@ package rioflashclient2.net
 		
 		public function SetSlideInfo(slideNumber:Number):void
 		{
-			this.slideNumber = slideNumber + 1;
+			this.slideNumber = slideNumber;
 		}
 		
 		public function SetDownloadedBytes(downloadedBytes:Number):void
@@ -79,7 +79,7 @@ package rioflashclient2.net
 		
 		public function SetTopicInfo(topicIndex:Number, topicTime:Number):void
 		{
-			this.topicIndex = topicIndex + 1;
+			this.topicIndex = topicIndex;
 			this.topicTime = topicTime;
 		}
 		
@@ -129,7 +129,7 @@ package rioflashclient2.net
 			{
 				this.setTargetsBySlide(targetSlide);
 				RemoteLogger.Instance.Log(new SlideChangedMessage(this.state, this.time, this.downloadedBytes,
-					this.slideNumber, this.topicIndex, this.topicTime, this.slideSync, this.targetTime, targetSlide + 1,
+					this.slideNumber, this.topicIndex, this.topicTime, this.slideSync, this.targetTime, targetSlide,
 					this.targetTopic, slideButton, this.playerMode));
 			}
 		}
@@ -205,7 +205,7 @@ package rioflashclient2.net
 						break;
 					}
 				}
-				this.targetSlide = i;
+				this.targetSlide = i - 1;
 
 				this.targetTopic = 0;
 				for (var j:uint = 0; j < this.topics.length; j++)
@@ -215,7 +215,7 @@ package rioflashclient2.net
 						break;
 					}
 				}
-				this.targetTopic = j;
+				this.targetTopic = j - 1;
 			}
 			else
 			{
@@ -229,6 +229,7 @@ package rioflashclient2.net
 		{
 			if (this.slideSync)
 			{
+				this.targetSlide = slideNumber;
 				this.targetTime = this.slides[slideNumber].time;
 				this.targetTopic = 0;
 				for (var j:uint = 0; j < this.topics.length; j++)
@@ -238,8 +239,7 @@ package rioflashclient2.net
 						break;
 					}
 				}
-				this.targetTopic = j;
-				this.targetSlide = slideNumber + 1;
+				this.targetTopic = j - 1;
 			}
 			else
 			{
