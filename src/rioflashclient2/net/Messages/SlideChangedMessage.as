@@ -16,7 +16,9 @@ package rioflashclient2.net.Messages
 		
 		public override function toString():String
 		{
-			var message:String = super.toString() + super.Separator + this.slideButton;
+			var message:String = super.toString() + super.Separator + this.targetSlide;
+			message += super.Separator + this.slideButton;
+
 			return message;
 		}
 	}
