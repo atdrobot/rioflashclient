@@ -36,7 +36,6 @@ package rioflashclient2.chrome.controlbar.widget {
   import rioflashclient2.event.SlideEvent;
   import rioflashclient2.model.Lesson;
   import rioflashclient2.model.Topics;
-  import rioflashclient2.net.StateMonitor;
 
   public class TopicsNavigator extends Tree {
     private var logger:Logger = Log.getLogger('TopicsNavigator');
@@ -63,9 +62,7 @@ package rioflashclient2.chrome.controlbar.widget {
 
     private function onClick(ev:ListEvent):void {
       this.openAllNodes();
-      //EventBus.dispatch(new PlayerEvent(PlayerEvent.TOPICS_SEEK, ev.item.time), EventBus.INPUT);
-	  StateMonitor.Instance.Jump("TOPIC_CHANGED", ev.item.time); //ev.index;
-	  EventBus.dispatch(new PlayerEvent(PlayerEvent.TOPICS_SEEK, ev), EventBus.INPUT);
+      EventBus.dispatch(new PlayerEvent(PlayerEvent.TOPICS_SEEK, ev.item.time), EventBus.INPUT);
     }
 
     private function onDurationChange(e:PlayerEvent):void {
@@ -86,12 +83,7 @@ package rioflashclient2.chrome.controlbar.widget {
     }
 
     private function highlightTopic(time:Number):void {
-      this.selectedIndex = this.dataProvider.getItemIndex(this.findNode('time', time.toString()));
-	  if( this.selectedIndex != -1 )
-	  {
-	      var topicTime:Number = this.topics.topicTimes[this.selectedIndex];
-	      StateMonitor.Instance.SetTopicInfo(this.selectedIndex + 1, topicTime);
-	  }
+      this.selectedIndex = this.dataProvider.getItemIndex(this.findNode('time', time.toString()))
     }
 
     private function onSeek(e:PlayerEvent):void {
@@ -140,7 +132,6 @@ package rioflashclient2.chrome.controlbar.widget {
       var topicsXML:XML = e.lesson.topics.toXML();
       this.dataProvider = new TreeDataProvider(topicsXML);
       this.openAllNodes();
-	  StateMonitor.Instance.SetTopics(this.topics.topicTimes);
     }
   }
 }
