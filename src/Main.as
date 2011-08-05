@@ -312,10 +312,10 @@ package {
     }
 
     private function getFormatedTitle(lesson:Object, limit:Number = 30):String{
-      var program:String = lesson.grad_program.length > limit ? lesson.grad_program.substring(0, limit)+"..." : lesson.grad_program;
-      var course:String = lesson.course.length > limit ? lesson.course.substring(0, limit)+"..." : lesson.course;
-      var professor:String = lesson.professor.length > limit ? lesson.professor.substring(0, limit)+"..." : lesson.professor;
-      return "<b>Disciplina:</b>" + program  + " - <b>Aula:</b> " + course + " - <b>Professor: </b>" + professor;
+		var course:String = lesson.course.length > limit ? lesson.course.substring(0, limit)+"..." : lesson.course;
+		var professor:String = lesson.professor.length > limit ? lesson.professor.substring(0, limit)+"..." : lesson.professor;
+		var title:String = lesson.title;
+		return "<b>Disciplina: </b>" + course  + " - <b>Aula:</b> " + title + " - <b>Professor: </b>" + professor;
     }
   }
 }
