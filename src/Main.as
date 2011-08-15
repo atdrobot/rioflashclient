@@ -314,7 +314,7 @@ package {
     private function getFormatedTitle(lesson:Object, limit:Number = 30):String{
 		var course:String = lesson.course.length > limit ? lesson.course.substring(0, limit)+"..." : lesson.course;
 		var professor:String = lesson.professor.length > limit ? lesson.professor.substring(0, limit)+"..." : lesson.professor;
-		var title:String = lesson.title;
+		var title:String = lesson.title.length > limit ? lesson.title.substring(0, limit)+"..." : lesson.title;
 		return "<b>Disciplina: </b>" + course  + " - <b>Aula:</b> " + title + " - <b>Professor: </b>" + professor;
     }
   }
