@@ -193,7 +193,7 @@ package rioflashclient2.player {
       sync = e.slide.sync;
       if (sync) {
         var time:Number = slides[findNearestSlide(videoPlayerCurrentTime)].time
-        showSlideByPosition(time);
+        showSlideByPosition(time, true);
       }
 	  StateMonitor.Instance.SetSlideSync(this.sync);
     }
@@ -231,8 +231,8 @@ package rioflashclient2.player {
       }
     }
 
-    private function showSlideByPosition(requestedPosition:Number):void {
-      showSlide(findNearestSlide(requestedPosition));
+    private function showSlideByPosition(requestedPosition:Number, ignoreEvent:Boolean=false):void {
+      showSlide(findNearestSlide(requestedPosition), ignoreEvent);
     }
 
     private function currentSlide():Loader {
