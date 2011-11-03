@@ -19,6 +19,11 @@ package rioflashclient2.event {
 
   import flash.events.Event;
 
+  /**
+   * Classe que define os eventos da classe SlidePlayer.
+   * @author LAND
+   * 
+   */  
   public class SlideEvent extends Event {
     public static const NEXT_SLIDE         :String = "onNextSlide";
     public static const PREV_SLIDE         :String = "onPrevSlide";

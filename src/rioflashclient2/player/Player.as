@@ -63,6 +63,12 @@ package rioflashclient2.player {
   import rioflashclient2.net.StateMonitor;
   import rioflashclient2.net.pseudostreaming.DefaultSeekDataStore;
 
+  
+  /**
+   * Classe Classe responsável pelo controle dos eventos do player de vídeo.
+   * @author LAND ???
+   * 
+   */  
   public class Player extends MediaPlayerSprite {
     private var logger:Logger = Log.getLogger('Player');
 
@@ -113,6 +119,10 @@ package rioflashclient2.player {
       logger.debug('Trait added: ' + event.traitType);
     }
 
+	/**
+	 * Função responsável por chamar todas os métodos necessários para carregar os dados da videoaula (vídeo, tópicos e slides). 
+	 * 
+	 */	
     public function loadMedia():void {
       var url:String = Configuration.getInstance().resourceURL(this.video.file());
       logger.info('Loading video from url: ' + url);
@@ -170,6 +180,10 @@ package rioflashclient2.player {
       logger.info("CuePoint type=" + cuePoint.name + " reached=" + cuePoint.time + ", currentTime:" + this.mediaPlayer.currentTime + ", diff="+diff);
     }
 
+	/**
+	 * Função de "play" do vídeo 
+	 * 
+	 */	
     public function play():void {
       logger.info('Playing...');
       fadeIn();
@@ -180,12 +194,20 @@ package rioflashclient2.player {
 	  StateMonitor.Instance.SetState("PLAY");
     }
 
+	/**
+	 * Função de "pause" do vídeo 
+	 * 
+	 */	
     public function pause():void {
       logger.info('Paused...');
       this.mediaPlayer.pause();
 	  StateMonitor.Instance.SetState("PAUSE");
     }
 
+	/**
+	 * Função que para a exibição do vídeo 
+	 * 
+	 */	
     public function stop():void {
       logger.info('Stopping...');
       this.mediaPlayer.stop();
@@ -197,33 +219,67 @@ package rioflashclient2.player {
       load(e.data.lesson);
     }
 
+	/**
+	 * Evento chamado quando é chamada a ação "play" do vídeo 
+	 * @param e
+	 * 
+	 */	
     private function onPlay(e:PlayerEvent):void {
       play();
     }
 
+	/**
+	 * Evento chamando quando é chamada a ação "pause" do vídeo 
+	 * @param e
+	 * 
+	 */	
     private function onPause(e:PlayerEvent):void {
       pause();
     }
 
+	/**
+	 * Evento chamado quando é chamada a ação "stop" do vídeo 
+	 * @param e
+	 * 
+	 */	
     private function onStop(e:PlayerEvent):void {
       stop();
     }
 
+	/**
+	 * Evento chamado quando o volume é alterado 
+	 * @param e
+	 * 
+	 */	
     private function onVolumeChange(e:PlayerEvent):void {
       logger.debug('Volume changed: ' + e.data);
       this.mediaPlayer.volume = e.data;
     }
-
+	/**
+	 * Evento chamado quando o áudio entra em estado mudo 
+	 * @param e
+	 * 
+	 */
     private function onMute(e:PlayerEvent):void {
       logger.debug('Volume muted.');
       this.mediaPlayer.muted = true;
     }
 
+	/**
+	 * Evento chamado quando o áudio sai do estado mudo. 
+	 * @param e
+	 * 
+	 */	
     private function onUnmute(e:PlayerEvent):void {
       logger.debug('Volume unmuted.');
       this.mediaPlayer.muted = false;
     }
 
+	/**
+	 * Evento chamado quando o vídeo acaba 
+	 * @param e
+	 * 
+	 */	
     private function onVideoEnded(e:TimeEvent):void {
       logger.info('Video ended.');
       EventBus.dispatch(new PlayerEvent(PlayerEvent.ENDED, { video: video }));
@@ -241,9 +297,15 @@ package rioflashclient2.player {
 	  StateMonitor.Instance.Jump("PROGRESSBAR_CHANGED", seekPosition);
     }
 
+	/**
+	 * Evento chamado quando ocorre um salto no tópico. 
+	 * @param e
+	 * 
+	 */	
     private function onTopicsSeek(e:PlayerEvent):void {
       //var seekPosition:Number = e.data;
-	  var seekPosition:Number = e.data.item.time;
+	  var seekPosition:Number = e.data.item.@time;
+	  //logger.info(' Tempo do topico: {0} ', seekPosition );
       var seekPercentage:Number = seekPosition / duration;
 
       seekTo(seekPercentage, seekPosition);
@@ -253,6 +315,11 @@ package rioflashclient2.player {
       slideSync = e.slide.sync;
     }
 
+	/**
+	 * Evento chamado quando um slide muda. Com a mudança do slide é necessário sincronizar o vídeo caso o flag slideSync esteja ligado 
+	 * @param e
+	 * 
+	 */	
     private function onSlideChanged(e:SlideEvent):void {
       if (slideSync) {
         logger.info('Slide syncing to {0}', e.slide.time);
@@ -263,6 +330,12 @@ package rioflashclient2.player {
       }
     }
 
+	/**
+	 * Função que faz um salto do vídeo de acordo com o parametro seekPosition 
+	 * @param seekPercentage
+	 * @param seekPosition
+	 * 
+	 */	
     private function seekTo(seekPercentage:Number, seekPosition:Number):void {
       if (isInBuffer(seekPercentage)) {
         logger.info('Seeking to position {0} in seconds, given percentual {1}.', seekPosition, seekPercentage);
@@ -388,7 +461,11 @@ package rioflashclient2.player {
       this.mediaPlayer.addEventListener(LoadEvent.BYTES_TOTAL_CHANGE, EventBus.dispatch);
       this.mediaPlayer.addEventListener(MediaPlayerStateChangeEvent.MEDIA_PLAYER_STATE_CHANGE, onStateChange);
     }
-
+	
+	/**
+	 *Adicionando listeners dos eventos. 
+	 * 
+	 */
     private function setupBusListeners():void {
       EventBus.addListener(PlayerEvent.LOAD, onLoad);
       EventBus.addListener(PlayerEvent.PLAY, onPlay);
@@ -410,7 +487,6 @@ package rioflashclient2.player {
 
       EventBus.addListener(ErrorEvent.ERROR, onError);
       EventBus.addListener(TimelineMetadataEvent.MARKER_TIME_REACHED, onCuePoint);
-
       EventBus.addListener(SlideEvent.SLIDE_CHANGED, onSlideChanged, EventBus.INPUT);
       EventBus.addListener(SlideEvent.SLIDE_SYNC_CHANGED, onSlideSyncChanged, EventBus.INPUT);
     }

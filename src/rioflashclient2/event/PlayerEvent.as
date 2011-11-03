@@ -19,6 +19,11 @@ package rioflashclient2.event {
 
   import flash.events.Event;
 
+  /**
+   * Classe que define os eventos da classe player.
+   * @author LAND ???
+   * 
+   */  
   public class PlayerEvent extends Event {
     public static const LOAD                        :String = "onLoad";
     public static const PLAY                        :String = "onPlay";

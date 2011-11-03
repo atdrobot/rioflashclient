@@ -16,6 +16,11 @@
  */
 
 package rioflashclient2.model {
+  /**
+   * Classe responsável pelo parser dos slides de acordo com o xml.
+   * @author LAND
+   * 
+   */	
   public class Slide {
     public var time:int;
     public var relative_path:String;
@@ -23,14 +28,28 @@ package rioflashclient2.model {
     public function Slide() {
     }
     
+	/**
+	 * Método que cria um objeto Slide de acordo com o parser feito no xml. 
+	 * @param rawSlide
+	 * @return 
+	 * 
+	 */	
     public static function createFromRaw(rawSlide:XML):Slide {
       var slide:Slide = new Slide();
-      slide.time = rawSlide.@time;
+	  if (rawSlide.@time == 0){
+		  slide.time = 1;
+	  }
+	  else
+        slide.time = rawSlide.@time;
       slide.relative_path = rawSlide.@relative_path;
 	  slide.actions = [];
 	  if(rawSlide.actions.action.length()){
 		  for each(var item:XML in rawSlide.actions.action){
-			  slide.actions.push({time: item.@time, callback:item.text()});
+			  if (item.@time == 0){
+				  slide.actions.push({time: 1, callback:item.text()});
+			  }
+			  else
+			    slide.actions.push({time: item.@time, callback:item.text()});
 		  }
 	  }
       return slide;

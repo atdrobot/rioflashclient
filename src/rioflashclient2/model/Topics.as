@@ -16,24 +16,49 @@
  */
 
 package rioflashclient2.model {
+  import org.osmf.logging.Logger;
+  
   import rioflashclient2.configuration.Configuration;
+
+  /**
+   * Classe reponsável pelo parser dos tópicos do xml.
+   * @author LAND
+   * 
+   */    
   public class Topics {
     public var rawXML:XML;
     public var parsedXML:XML;
     public var topicTimes:Array = new Array();
 
+	/**
+	 * Construtor da classe que chama o parser xml dos tópicos para o arquivo especificado através do parâmetro. 
+	 * @param xml
+	 * 
+	 */	
     public function Topics(xml:XML) {
       rawXML = xml;
       parsedXML = parse(rawXML);
     }
 
+	/**
+	 * Parser dos tópicos do arquivo xml.
+	 * @param xml
+	 * @return 
+	 * 
+	 */	
     public function parse(xml:XML):XML {
       var item:XML = <node />
-
       if (xml.hasOwnProperty("text")) {
-        item.@label = Configuration.getInstance().formatTime(xml.time) + " - " + xml.text;
-        item.@time = xml.time;
-        topicTimes.push(xml.time);
+        if ( Configuration.getInstance().formatTime(xml.time) == "00:00" ) {
+			item.@label = "00:01" + " - " + xml.text;
+			item.@time = 1;
+			topicTimes.push(1);
+		}
+		else {
+			item.@label = Configuration.getInstance().formatTime(xml.time) + " - " + xml.text;
+			item.@time = xml.time;
+			topicTimes.push(xml.time);	
+		}
       } else {
         item.@label = 'Root';
       }
@@ -45,6 +70,11 @@ package rioflashclient2.model {
       return item;
     }
 
+	/**
+	 * Método que retorna o xml já com o parser efetuado. 
+	 * @return 
+	 * 
+	 */	
     public function toXML():XML {
       return parsedXML;
     }

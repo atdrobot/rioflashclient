@@ -53,13 +53,14 @@ package rioflashclient2.event {
         return super.dispatchEvent(event);
       } else {
         logger.warn('Event bus disabled, not dispatching event {0}.', event.type);
-
+		logger.info('Event bus disabled, not dispatching event {0}.', event.type);
         return false;
       }
     }
 
     override public function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void {
       logger.debug('Adding listener for {0}.', type);
+	  //logger.info('Adding listener for {0}.', type);
 
       return super.addEventListener(type, listener, useCapture, priority, useWeakReference);
     }
