@@ -36,19 +36,11 @@ package rioflashclient2.model {
 	 */	
     public static function createFromRaw(rawSlide:XML):Slide {
       var slide:Slide = new Slide();
-	  if (rawSlide.@time == 0){
-		  slide.time = 1;
-	  }
-	  else
-        slide.time = rawSlide.@time;
+      slide.time = rawSlide.@time;
       slide.relative_path = rawSlide.@relative_path;
 	  slide.actions = [];
 	  if(rawSlide.actions.action.length()){
 		  for each(var item:XML in rawSlide.actions.action){
-			  if (item.@time == 0){
-				  slide.actions.push({time: 1, callback:item.text()});
-			  }
-			  else
 			    slide.actions.push({time: item.@time, callback:item.text()});
 		  }
 	  }

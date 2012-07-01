@@ -20,8 +20,12 @@ package rioflashclient2.net
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	
+	import org.osmf.logging.Log;
+	import org.osmf.logging.Logger;
+	
 	import rioflashclient2.net.Messages.ActionMessage;
 	import rioflashclient2.net.Messages.JumpActionMessage;
+	import rioflashclient2.net.Messages.Message;
 	import rioflashclient2.net.Messages.ResizeMessage;
 	import rioflashclient2.net.Messages.SlideChangedMessage;
 	import rioflashclient2.net.Messages.StartSessionMessage;
@@ -29,6 +33,7 @@ package rioflashclient2.net
 	
 	public class StateMonitor
 	{
+		private var logger:Logger = Log.getLogger('StateMonitor');
 		private var xmlPath:String = "";
 		// Slide Info
 		private var slideNumber:Number = 0;
@@ -59,7 +64,7 @@ package rioflashclient2.net
 			}
 			this.updateTimer = new Timer(30000);
 			updateTimer.addEventListener(TimerEvent.TIMER, timerTriggered);
-			updateTimer.start();
+			updateTimer.start();		
 		}
 
 		public static function get Instance():StateMonitor
@@ -88,9 +93,10 @@ package rioflashclient2.net
 			this.slideSync = slideSync;
 			if (RemoteLogger.Instance.HasInitialized)
 			{
-				RemoteLogger.Instance.Log(new ActionMessage("SYNC", this.state, this.time, this.downloadedBytes,
+				RemoteLogger.Instance.SendLog(new ActionMessage("SYNC", this.state, this.time, this.downloadedBytes,
 					this.slideNumber, this.topicIndex, this.topicTime, this.slideSync, this.playerMode));
 			}
+
 		}
 		
 		public function SetState(state:String):void
@@ -98,50 +104,62 @@ package rioflashclient2.net
 			this.state = state;
 			if (RemoteLogger.Instance.HasInitialized)
 			{
-			    RemoteLogger.Instance.Log(new ActionMessage(this.state, this.state, this.time, this.downloadedBytes,
+				//Essa verificação é feita para evitar que mensagens iniciais sejam enviadas desnecessáriamente
+				if (this.downloadedBytes != 0)
+			    	RemoteLogger.Instance.SendLog(new ActionMessage(this.state, this.state, this.time, this.downloadedBytes,
 				    this.slideNumber, this.topicIndex, this.topicTime, this.slideSync, this.playerMode));
 			}
+
 		}
 		
 		public function Jump(state:String, targetTime:Number):void
 		{
-			if (RemoteLogger.Instance.HasInitialized)
-			{
-				this.setTargetsByTime(targetTime);
-			    RemoteLogger.Instance.Log(new JumpActionMessage(state, this.state, this.time, this.downloadedBytes,
-				    this.slideNumber, this.topicIndex, this.topicTime, this.slideSync, this.playerMode,
-					targetTime, this.targetSlide, this.targetTopic));
-			}
+			logger.info('Sending state: {0},{1}',state, targetTime);
+				if (RemoteLogger.Instance.HasInitialized)
+				{
+					this.setTargetsByTime(targetTime);
+			    	RemoteLogger.Instance.SendLog(new JumpActionMessage(state, this.state, this.time, this.downloadedBytes,
+				    	this.slideNumber, this.topicIndex, this.topicTime, this.slideSync, this.playerMode,
+						targetTime, this.targetSlide, this.targetTopic));
+
+				}
+
 		}
 		
 		public function Resize():void
 		{
 			if (RemoteLogger.Instance.HasInitialized)
 			{
-		    	RemoteLogger.Instance.Log(new ActionMessage("RESIZE", this.state, this.time, this.downloadedBytes,
+				//Essa verificação é feita para evitar que mensagens iniciais sejam enviadas desnecessáriamente
+				if (this.downloadedBytes != 0)
+		    		RemoteLogger.Instance.SendLog(new ActionMessage("RESIZE", this.state, this.time, this.downloadedBytes,
 					this.slideNumber, this.topicIndex, this.topicTime, this.slideSync, this.playerMode));
 			}
 		}
 		
 		public function SlideChanged(targetSlide:Number, slideButton:String):void
 		{
+
 			if (RemoteLogger.Instance.HasInitialized)
 			{
 				this.setTargetsBySlide(targetSlide);
-				RemoteLogger.Instance.Log(new SlideChangedMessage(this.state, this.time, this.downloadedBytes,
+				RemoteLogger.Instance.SendLog(new SlideChangedMessage(this.state, this.time, this.downloadedBytes,
 					this.slideNumber, this.topicIndex, this.topicTime, this.slideSync, this.targetTime, targetSlide + 1,
 					this.targetTopic, slideButton, this.playerMode));
 			}
+
 		}
 
 		public function SetPlayerMode(playerMode:String):void
 		{
+
 			this.playerMode = playerMode;
 			if (RemoteLogger.Instance.HasInitialized)
 			{
-				RemoteLogger.Instance.Log(new ActionMessage("PLAYER_MODE_CHANGED", this.state, this.time, this.downloadedBytes,
+				RemoteLogger.Instance.SendLog(new ActionMessage("PLAYER_MODE_CHANGED", this.state, this.time, this.downloadedBytes,
 					this.slideNumber, this.topicIndex, this.topicTime, this.slideSync, this.playerMode));
 			}
+
 		}
 		
 		public function SetSlides(slides:Array):void
@@ -164,12 +182,18 @@ package rioflashclient2.net
 			this.xmlPath = xmlPath;
 		}
 		
+		public function SendSessionStartMsg():void
+		{
+			Message.setSessionId();
+			RemoteLogger.Instance.SendLog(new StartSessionMessage(this.xmlPath, "1.1"));
+		}		
+		
 		public function StartSession():void
 		{
 			// FIXME: How to get rioclient version?
 			if (!RemoteLogger.Instance.HasInitialized)
 			{
-			    RemoteLogger.Instance.Log(new StartSessionMessage(this.xmlPath, "1.0"));
+			    //RemoteLogger.Instance.SendLog(new StartSessionMessage(this.xmlPath, "1.0"));
 			}
 		}
 		
@@ -177,7 +201,7 @@ package rioflashclient2.net
 		{
 			if (this.hasStarted())
 			{
-			    RemoteLogger.Instance.Log(new ActionMessage("STATE", this.state, this.time, this.downloadedBytes,
+			    RemoteLogger.Instance.SendLog(new ActionMessage("STATE", this.state, this.time, this.downloadedBytes,
 				                                        this.slideNumber, this.topicIndex, this.topicTime, this.slideSync, this.playerMode));
 			}
 		}
@@ -195,50 +219,63 @@ package rioflashclient2.net
 		
 		private function setTargetsByTime(targetTime:Number):void
 		{
-			this.targetSlide = 0;
-			for (var i:uint = 0; i < this.slides.length; i++)
+			if (this.slides && this.topics)
 			{
-				if (targetTime < this.slides[i].time)
+				this.targetSlide = 0;
+				for (var i:uint = 0; i < this.slides.length; i++)
 				{
-					break;
+					if (targetTime < this.slides[i].time)
+					{
+						break;
+					}
 				}
-			}
-			this.targetSlide = i;
-
-			this.targetTopic = 0;
-			for (var j:uint = 0; j < this.topics.length; j++)
-			{
-				if (targetTime < this.topics[j])
+				this.targetSlide = i;
+	
+				this.targetTopic = 0;
+				for (var j:uint = 0; j < this.topics.length; j++)
 				{
-					break;
+					if (targetTime < this.topics[j])
+					{
+						break;
+					}
 				}
-			}
-			this.targetTopic = j;
-
-			if (this.slideSync == false)
-			{
-				this.targetSlide = -1;
+				this.targetTopic = j;
+	
+				if (this.slideSync == false)
+				{
+					this.targetSlide = -1;
+				}
+				
 			}
 		}
 		
-		private function setTargetsBySlide(slideNumber:Number):void
+		//Função adicionada para que seja possível obter o tempo dos slides
+		public function getTopicTime(topicIndex:Number):Number
 		{
-			this.targetTime = this.slides[slideNumber].time;
-			this.targetTopic = 0;
-			for (var j:uint = 0; j < this.topics.length; j++)
+			return this.topics[topicIndex];
+		}
+		
+		public function setTargetsBySlide(slideNumber:Number):void
+		{
+			if (this.slides && this.topics)
 			{
-				if (this.targetTime < this.topics[j])
+				this.targetTime = this.slides[slideNumber].time;
+				this.targetTopic = 0;
+				for (var j:uint = 0; j < this.topics.length; j++)
 				{
-					break;
+					if (this.targetTime < this.topics[j])
+					{
+						break;
+					}
 				}
-			}
-			this.targetTopic = j;
-			this.targetSlide = slideNumber + 1;
-
-			if (this.slideSync == false)
-			{
-				this.targetTime = -1;
-				this.targetTopic = -1;
+				this.targetTopic = j;
+				this.targetSlide = slideNumber + 1;
+	
+				if (this.slideSync == false)
+				{
+					this.targetTime = -1;
+					this.targetTopic = -1;
+				}
 			}
 		}
 	}

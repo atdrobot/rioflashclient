@@ -24,12 +24,17 @@ package rioflashclient2.net
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import flash.net.URLVariables;
+	
+	import org.osmf.logging.Log;
+	import org.osmf.logging.Logger;
 	
 	import rioflashclient2.net.Messages.Message;
 
 	public class RemoteLogger
 	{
-		private var RemoteSite:String = "http://edad.rnp.br/";
+		private var logger:Logger = Log.getLogger('RemoteLogger');
+		private var RemoteSite:String = ""; //TODO: CRIAR MSG DE ERRO CASO O SERVIDOR NAO SEJA PREENCHIDO
 		private const RemotePage:String = "userlog.rio?logline=";
 		private var ActionStringPrefix:String = RemoteSite + RemotePage;
 		
@@ -48,9 +53,10 @@ package rioflashclient2.net
 			
 			// set the loaders listener function that gets the event  
 			this.urlLoader.addEventListener(Event.COMPLETE, urlLoaderComplete);  
+			this.urlLoader.addEventListener(ProgressEvent.PROGRESS, urlLoaderComplete); 
 			this.urlLoader.addEventListener(Event.OPEN, urlLoaderComplete);  
-			this.urlLoader.addEventListener(flash.events.ProgressEvent.PROGRESS, urlLoaderComplete);
-			this.urlLoader.addEventListener(flash.events.HTTPStatusEvent.HTTP_STATUS, urlLoaderComplete);  
+			//this.urlLoader.addEventListener(flash.events.ProgressEvent.PROGRESS, urlLoaderComplete);
+			this.urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, urlLoaderComplete);  
 			this.urlLoader.addEventListener(IOErrorEvent.IO_ERROR, urlLoaderComplete);
 			this.urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, urlLoaderComplete);
 			// this.urlLoader.addEventListener(Event.*, urlLoaderComplete);
@@ -66,11 +72,19 @@ package rioflashclient2.net
 			this.urlLoader.load( new URLRequest(ActionStringPrefix + action));
 		}
 		
-		public function Log(message:Message):void
+		public function SendLog(message:Message):void
 		{
 			var url:String = ActionStringPrefix + message.toString();
 			this.urlDebug = url;
-			this.urlLoader.load( new URLRequest(url) );
+			logger.info('Ready to send: {0}', url);
+
+			var request:URLRequest = new URLRequest(url);
+			try {
+				urlLoader.load(request);
+				logger.info('Enviado');
+			} catch (error:Error) {
+				logger.info('Erro ao enviar log');
+			}
 		}
 		
 		public function get HasInitialized():Boolean

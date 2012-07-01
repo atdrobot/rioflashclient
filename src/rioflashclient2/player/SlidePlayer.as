@@ -18,25 +18,25 @@
 package rioflashclient2.player {
   import br.com.stimuli.loading.BulkLoader;
   import br.com.stimuli.loading.BulkProgressEvent;
-
+  
   import caurina.transitions.Tweener;
-
-  import flash.events.Event;
-  import flash.display.MovieClip;
+  
   import flash.display.Loader;
+  import flash.display.MovieClip;
+  import flash.events.Event;
   import flash.geom.Rectangle;
-  import flash.utils.setTimeout;
+  import flash.system.ApplicationDomain;
   import flash.system.LoaderContext;
   import flash.system.Security;
-  import flash.system.ApplicationDomain;
   import flash.system.SecurityDomain;
-
+  import flash.utils.setTimeout;
+  
   import org.osmf.events.TimeEvent;
+  import org.osmf.events.TimelineMetadataEvent;
   import org.osmf.logging.Log;
   import org.osmf.logging.Logger;
-  import org.osmf.events.TimelineMetadataEvent;
   import org.osmf.metadata.CuePoint;
-
+  
   import rioflashclient2.configuration.Configuration;
   import rioflashclient2.event.EventBus;
   import rioflashclient2.event.PlayerEvent;
@@ -106,7 +106,7 @@ package rioflashclient2.player {
       loader.addEventListener(BulkLoader.COMPLETE, onAllItemsLoaded);
       loader.addEventListener(BulkLoader.PROGRESS, onAllProgress);
 
-      trace("starting loading slides");
+	  logger.info('Starting loading slides');
       loader.start(1);
     }
 
@@ -119,18 +119,33 @@ package rioflashclient2.player {
       trace("first slide loaded");
       addToContainer(0, true);
       if (slides.length == 1) {
+		//Código adicionado para evitar que a primeira mensagem de log seja enviada
+		//com parâmetros zerados. Estamos iniciando as variáveis com o primeiro slide e 
+		//o primeiro tópico e seu respectivo tempo		  
+		StateMonitor.Instance.SetSlideInfo(0);
+		StateMonitor.Instance.setTargetsBySlide(0);
+		StateMonitor.Instance.SetTopicInfo(0,StateMonitor.Instance.getTopicTime(0));		  
         lesson.video().play();
       }
     }
 
     public function onSecondItemLoaded(e:Event):void {
       trace("second slide loaded, starting to play");
+	  
+	  //Código adicionado para evitar que a primeira mensagem de log seja enviada
+	  //com parâmetros zerados. Estamos iniciando as variáveis com o primeiro slide e 
+	  //o primeiro tópico e seu respectivo tempo
+	  StateMonitor.Instance.SetSlideInfo(0);
+	  StateMonitor.Instance.setTargetsBySlide(0);
+	  StateMonitor.Instance.SetTopicInfo(0,StateMonitor.Instance.getTopicTime(0));
+	  
+	  
       lesson.video().play();
     }
 
     public function onAllItemsLoaded(e:BulkProgressEvent) : void {
       trace("all slides loaded");
-	  StateMonitor.Instance.SetSlides(this.slides);
+	  //StateMonitor.Instance.SetSlides(this.slides);
     }
 
     public function onAllProgress(e:BulkProgressEvent) : void {
@@ -201,7 +216,7 @@ package rioflashclient2.player {
     private function onSeek(e:PlayerEvent):void {
       if (sync) {
         var seekPercentage:Number = (e.data as Number);
-        if (seekPercentage <= 0) {
+        if (seekPercentage < 0) {
           seekPercentage = 1 / duration;
         }
         var seekPosition:Number = calculatedSeekPositionGivenPercentage(seekPercentage);
@@ -240,7 +255,7 @@ package rioflashclient2.player {
     }
 
     public function showSlide(index:Number, ignoreEvent:Boolean=false):void {
-      trace("START show slide");
+      trace("start show slide");
       if (currentSlideIndex != index && !loading) {
         trace("will load slide");
 
@@ -251,7 +266,7 @@ package rioflashclient2.player {
 
           addToContainer(index, ignoreEvent);
         } else {
-          trace("not loaded, loading");
+			trace('not loaded, loading slide');
 
           if (sync) {
             EventBus.dispatch(new PlayerEvent(PlayerEvent.PAUSE));

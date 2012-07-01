@@ -18,17 +18,17 @@
 package rioflashclient2.chrome.controlbar.widget {
   import com.yahoo.astra.fl.controls.Tree;
   import com.yahoo.astra.fl.controls.treeClasses.*;
-
+  
   import fl.events.ListEvent;
-
+  
   import flash.events.Event;
   import flash.events.MouseEvent;
-
+  
   import org.osmf.events.TimelineMetadataEvent;
   import org.osmf.logging.Log;
   import org.osmf.logging.Logger;
   import org.osmf.metadata.CuePoint;
-
+  
   import rioflashclient2.configuration.Configuration;
   import rioflashclient2.event.EventBus;
   import rioflashclient2.event.LessonEvent;
@@ -36,6 +36,7 @@ package rioflashclient2.chrome.controlbar.widget {
   import rioflashclient2.event.SlideEvent;
   import rioflashclient2.model.Lesson;
   import rioflashclient2.model.Topics;
+  import rioflashclient2.net.Messages.Message;
   import rioflashclient2.net.StateMonitor;
 
   public class TopicsNavigator extends Tree {
@@ -63,8 +64,8 @@ package rioflashclient2.chrome.controlbar.widget {
 
     private function onClick(ev:ListEvent):void {
       this.openAllNodes();
-      //EventBus.dispatch(new PlayerEvent(PlayerEvent.TOPICS_SEEK, ev.item.time), EventBus.INPUT);
 	  StateMonitor.Instance.Jump("TOPIC_CHANGED", ev.item.time); //ev.index;
+
 	  EventBus.dispatch(new PlayerEvent(PlayerEvent.TOPICS_SEEK, ev), EventBus.INPUT);
     }
 

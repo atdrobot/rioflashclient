@@ -126,7 +126,7 @@ package rioflashclient2.player {
     public function loadMedia():void {
       var url:String = Configuration.getInstance().resourceURL(this.video.file());
       logger.info('Loading video from url: ' + url);
-      RemoteLogger.Instance.SetServer(url.substring(0, url.indexOf("/", 8)));
+      //RemoteLogger.Instance.SetServer(url.substring(0, url.indexOf("/", 8)));
 
       netLoader = new RioServerNetLoader();
       var videoElement:VideoElement = new VideoElement(null, netLoader);
@@ -145,7 +145,7 @@ package rioflashclient2.player {
       slidesTimelineMetadata.addEventListener(TimelineMetadataEvent.MARKER_TIME_REACHED, EventBus.dispatch, false, 0, true);
       addSlidesMetadata(this.slides);
 
-	  Message.setSessionId();
+	  //Message.setSessionId();
       slidesActionsTimelineMetadata = new TimelineMetadata(pseudoStreamingProxyElement);
       slidesActionsTimelineMetadata.addEventListener(TimelineMetadataEvent.MARKER_TIME_REACHED, EventBus.dispatch, false, 0, true);
       addSlidesActionsMetadata(this.slides);
@@ -304,8 +304,8 @@ package rioflashclient2.player {
 	 */	
     private function onTopicsSeek(e:PlayerEvent):void {
       //var seekPosition:Number = e.data;
-	  var seekPosition:Number = e.data.item.@time;
-	  //logger.info(' Tempo do topico: {0} ', seekPosition );
+	  var seekPosition:Number = e.data.item.time;
+	  logger.info(' Tempo do topico: {0} ', seekPosition );
       var seekPercentage:Number = seekPosition / duration;
 
       seekTo(seekPercentage, seekPosition);
@@ -342,7 +342,12 @@ package rioflashclient2.player {
       } else {
         logger.info('Server seek requested to position {0} in seconds, given percentual {1}.', seekPosition, seekPercentage);
       }
-      this.mediaPlayer.seek(seekPosition);
+	  
+	  //O player nao reconhece o tempo 0
+	  if (seekPosition == 0)
+        this.mediaPlayer.seek(0.001);
+	  else
+		this.mediaPlayer.seek(seekPosition);
     }
 
     private function isInBuffer(seekPercentage:Number):Boolean {

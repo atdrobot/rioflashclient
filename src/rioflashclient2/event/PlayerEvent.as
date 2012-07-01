@@ -21,7 +21,7 @@ package rioflashclient2.event {
 
   /**
    * Classe que define os eventos da classe player.
-   * @author LAND ???
+   * @author LAND
    * 
    */  
   public class PlayerEvent extends Event {

@@ -16,10 +16,6 @@
  */
 
 package rioflashclient2.model {
-  import rioflashclient2.configuration.Configuration;
-  import rioflashclient2.event.EventBus;
-  import rioflashclient2.event.LessonEvent;
-
   import flash.events.ErrorEvent;
   import flash.events.Event;
   import flash.events.EventDispatcher;
@@ -28,10 +24,15 @@ package rioflashclient2.model {
   import flash.events.TextEvent;
   import flash.net.URLLoader;
   import flash.net.URLRequest;
-
+  
+  import org.hamcrest.object.instanceOf;
   import org.osmf.logging.Log;
   import org.osmf.logging.Logger;
   
+  import rioflashclient2.configuration.Configuration;
+  import rioflashclient2.event.EventBus;
+  import rioflashclient2.event.LessonEvent;
+  import rioflashclient2.net.RemoteLogger;
   import rioflashclient2.net.StateMonitor;
 
   public class LessonLoader extends GenericLoader {
@@ -40,21 +41,34 @@ package rioflashclient2.model {
 
     protected override function loaded(data:*):void {
       var lesson:Lesson = new Lesson();
-      lesson.parse(new XML(data));
+	  
+	  try{
+		  var xml:XML = new XML(data)
+	  }catch(e : Error){
+		  EventBus.dispatch(new ErrorEvent(ErrorEvent.ERROR, false, false, "Não foi possível encontrar o arquivo indicado." ));
+	  }
+	  
+      lesson.parse(xml);
       lesson.loadTopicsAndSlides();
+	  
 
       if (lesson.valid()) {
         EventBus.dispatch(new LessonEvent(LessonEvent.LOADED, lesson));
         logger.info('Lesson loaded.');
       } else {
-        EventBus.dispatch(new ErrorEvent(ErrorEvent.ERROR, false, false, 'Lesson is not valid.'));
+        EventBus.dispatch(new ErrorEvent(ErrorEvent.ERROR, false, false, "Não foi possível encontrar todos os itens da videoaula." ));
         logger.error('Lesson is not valid.');
       }
     }
 
     protected override function url():String {
+		var url:String = Configuration.getInstance().resourceURL(Configuration.getInstance().lessonXML);
+		RemoteLogger.Instance.SetServer(url.substring(0, url.indexOf("/", 8)));		
+		
 		var path:String = Configuration.getInstance().getXMLPath();
 		StateMonitor.Instance.SetXmlPath(path);
+		StateMonitor.Instance.SendSessionStartMsg();
+		StateMonitor.Instance.StartSession();
       return Configuration.getInstance().resourceURL(Configuration.getInstance().lessonXML);
     }
   }

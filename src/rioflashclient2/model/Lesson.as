@@ -18,15 +18,18 @@
 package rioflashclient2.model {
   import br.com.stimuli.loading.BulkLoader;
   import br.com.stimuli.loading.BulkProgressEvent;
-
+  
   import flash.events.Event;
-
+  
+  import mx.utils.object_proxy;
+  
   import org.osmf.events.TimeEvent;
-
+  
   import rioflashclient2.configuration.Configuration;
   import rioflashclient2.event.EventBus;
   import rioflashclient2.event.LessonEvent;
   import rioflashclient2.event.PlayerEvent;
+  import rioflashclient2.net.StateMonitor;
 
   public class Lesson {
     public var loader:BulkLoader;
@@ -153,9 +156,11 @@ package rioflashclient2.model {
       for each (var slide:XML in syncXML.slide) {
         slides.push(Slide.createFromRaw(slide));
       }
-
+	  StateMonitor.Instance.SetSlides(this.slides);
+	  
       topics = new Topics(indexXML);
 
+	  
       EventBus.dispatch(new LessonEvent(LessonEvent.RESOURCES_LOADED, this));
       dispatchLoad();
     }

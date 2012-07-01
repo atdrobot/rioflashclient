@@ -22,6 +22,8 @@ package rioflashclient2.model {
   import flash.events.Event;
   import flash.events.IOErrorEvent;
   import flash.events.SecurityErrorEvent;
+  import flash.events.HTTPStatusEvent;
+  import flash.events.ProgressEvent;
   import flash.events.TextEvent;
   import flash.net.URLLoader;
   import flash.net.URLRequest;
@@ -62,11 +64,14 @@ package rioflashclient2.model {
     }
     
     protected function onError(e:TextEvent):void {
-      EventBus.dispatch(new ErrorEvent(ErrorEvent.ERROR, false, false, e.text));
+      EventBus.dispatch(new ErrorEvent(ErrorEvent.ERROR, false, false, "Não foi possível se conectar ao servidor."));
     }
     
+	/*
+	 * Adiciona os eventos de tratamento de URL
+	*/
     private function addLoadURLListeners():void {
-      loader.addEventListener(Event.COMPLETE, onLoad);
+	  loader.addEventListener(Event.COMPLETE, onLoad);
       loader.addEventListener(IOErrorEvent.IO_ERROR, onError);
       loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onError);
     }

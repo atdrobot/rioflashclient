@@ -49,16 +49,9 @@ package rioflashclient2.model {
     public function parse(xml:XML):XML {
       var item:XML = <node />
       if (xml.hasOwnProperty("text")) {
-        if ( Configuration.getInstance().formatTime(xml.time) == "00:00" ) {
-			item.@label = "00:01" + " - " + xml.text;
-			item.@time = 1;
-			topicTimes.push(1);
-		}
-		else {
-			item.@label = Configuration.getInstance().formatTime(xml.time) + " - " + xml.text;
-			item.@time = xml.time;
-			topicTimes.push(xml.time);	
-		}
+		item.@label = Configuration.getInstance().formatTime(xml.time) + " - " + xml.text;
+		item.@time = xml.time;
+		topicTimes.push(xml.time);	
       } else {
         item.@label = 'Root';
       }

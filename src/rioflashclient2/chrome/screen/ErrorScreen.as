@@ -97,7 +97,7 @@ package rioflashclient2.chrome.screen {
     }
 
     public function showError(e:Event):void {
-      showErrorScreen(DEFAULT_HEADER , DEFAULT_TITLE.toUpperCase(), DEFAULT_DESCRIPTION.toLowerCase());
+      showErrorScreen(DEFAULT_HEADER , DEFAULT_TITLE.toUpperCase(), e.text);
     }
 
     private function resizeAndPosition(e:Event=null):void {
