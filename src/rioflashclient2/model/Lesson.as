@@ -20,10 +20,14 @@ package rioflashclient2.model {
   import br.com.stimuli.loading.BulkProgressEvent;
   
   import flash.events.Event;
+  import flash.net.getClassByAlias;
   
   import mx.utils.object_proxy;
   
+  import org.flexunit.internals.namespaces.classInternal;
   import org.osmf.events.TimeEvent;
+  import org.osmf.logging.Log;
+  import org.osmf.logging.Logger;
   
   import rioflashclient2.configuration.Configuration;
   import rioflashclient2.event.EventBus;
@@ -55,9 +59,11 @@ package rioflashclient2.model {
     public var slides:Array = new Array();
     private var _video:Video;
 
+	protected var logger:Logger;
 
     public function Lesson() {
-      // do nothing
+       // do nothing
+	   logger = Log.getLogger('Lesson');
     }
 
     public function valid():Boolean {
@@ -81,26 +87,99 @@ package rioflashclient2.model {
         return slide.valid();
       });
     }
+	
+	public function getString( xmllist: XMLList ):String
+	{
+		var Indice:int = -1;
+		if( xmllist == null )
+			return "";
+		for( var i:int = 0; i < xmllist.length(); i++ )
+		{
+			if( xmllist[ i ].attribute( "language" ) == 'pt-BR' )
+			{
+				Indice = i;
+				break;
+			}
+		}
+		if( Indice == -1 )
+			return xmllist[ 0 ];
+		else
+			return xmllist[ Indice ];
+	}
 
     public function parse(xml:XML):void {
-      filename = xml.obj_filename;
-      filesize = xml.obj_filesize;
-      title = xml.obj_title;
-      type = xml.obj_type;
-      professor = xml.professor;
-      course = xml.course;
-      coursecode = xml.coursecode;
-      grad_program = xml.grad_program;
-      source = xml.source;
-      bitrate = xml.bitrate;
-      duration = toNumber(xml.duration);
-      resolution_x = xml.resolution.r_x
-      resolution_y = xml.resolution.r_y
-      index = xml.related_media.rm_item.(rm_type == 'index').rm_filename;
-      sync = xml.related_media.rm_item.(rm_type == 'sync').rm_filename;
-      _video = new Video(xml.related_media.rm_item.(rm_type == 'video').rm_filename);
-
-      setupInputBusListeners();
+	  var XmlType:String = xml.name().toString();
+	  var VideoFileName:String;
+	  if( XmlType == 'rio_object' )
+	  {
+          filename = xml.obj_filename;
+		  logger.info( filename );
+          filesize = xml.obj_filesize;
+          title = xml.obj_title;
+          type = xml.obj_type;
+          professor = xml.professor;
+          course = xml.course;
+          coursecode = xml.coursecode;
+          grad_program = xml.grad_program;
+          source = xml.source;
+          bitrate = xml.bitrate;
+          duration = toNumber(xml.duration);
+          resolution_x = xml.resolution.r_x
+          resolution_y = xml.resolution.r_y
+          index = xml.related_media.rm_item.(rm_type == 'index').rm_filename;
+          sync = xml.related_media.rm_item.(rm_type == 'sync').rm_filename;
+		  VideoFileName = xml.related_media.rm_item.(rm_type == 'video').rm_filename
+	  }
+	  else
+	  {
+		  var AuthorPattern:RegExp = /^.*FN:|END.*$/g;
+		  var StrDurationPattern1:RegExp = /^PT|S$/g;
+		  var StrDurationPattern2:RegExp = /H|M/g;
+		  title = getString( xml.general.title.string ); 
+		  type = "";
+		  professor = xml.lifecycle.contribute.(role == 'author').entity[ 1 ];
+		  if( professor == null )
+		  {
+			  professor = xml.lifecycle.contribute.(role == 'author').entity[ 0 ];
+			  if ( professor == null )
+				  professor = "";
+		  }
+		  professor = professor.replace( AuthorPattern, "" );
+		  course = getString( xml.videoaula.educational.course.title.string );
+		  coursecode = xml.videoaula.educational.course.code;
+		  source = xml.lifecycle.contribute.(role == 'author').entity[ 0 ];
+		  if( source == null )
+		     source = "";
+		  source = source.replace( AuthorPattern, "" );
+		  grad_program = getString( xml.videoaula.program.string );
+		  bitrate = xml.videoaula.technical.bitrate;
+		  var StrDuration:String = xml.technical.duration;
+		  StrDuration = StrDuration.replace( StrDurationPattern1, "" );
+		  StrDuration = StrDuration.replace( StrDurationPattern2, ":" );
+		  duration = toNumber( StrDuration );
+          var resolution:String = xml.technical.platformspecificfeatures.specificstandardresolution;
+		  if( ( resolution != null ) && ( resolution.lastIndexOf( "x" ) != -1 ) )
+		  {
+			  var Indice:int = resolution.lastIndexOf( "x" );
+              resolution_x = resolution.substring( 0, Indice - 1 );
+			  resolution_y = resolution.substring( Indice + 1 );
+		  }
+		  else
+		  {
+			  if( resolution != null )
+				  logger.error( "Valor invalido " + resolution + " no campo de resolucao. Valor ignorado!" );  
+			  resolution_x = "";
+			  resolution_y = "";
+		  }
+		  index = xml.videoaula.technical.relatedmedia.(catalog == 'index').entry;
+		  sync = xml.videoaula.technical.relatedmedia.(catalog == 'sync').entry;
+		  VideoFileName = xml.videoaula.technical.relatedmedia.(catalog == 'video').entry
+		  filename = VideoFileName;
+		  filesize = xml.technical.size;
+	  }
+	  _video = new Video( VideoFileName );
+	  
+	  setupInputBusListeners();
     }
 
     public function toNumber(value:String):Number{
